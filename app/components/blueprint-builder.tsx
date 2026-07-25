@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { calculateMetrics, formatINR, type Frequency, type Kind, type LineItem } from "@/lib/finance";
+import { calculateMetrics, formatUSD, type Frequency, type Kind, type LineItem } from "@/lib/finance";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -123,7 +123,7 @@ export function BlueprintBuilder() {
     <main>
       <header className="hero">
         <div className="shell">
-          <span className="eyebrow">₹ FINANCIAL BLUEPRINT</span>
+          <span className="eyebrow">$ FINANCIAL BLUEPRINT</span>
           <h1>Make your money feel clear.</h1>
           <p>Lay out what comes in, what goes out and what you own. We’ll turn it into a plain-English next step.</p>
         </div>
@@ -161,12 +161,12 @@ export function BlueprintBuilder() {
             <div className="forms">
               {kinds.map(({ kind, title, hint }) => (
                 <section className="card item-section" key={kind}>
-                  <div className="section-title"><div><span className={`kind-dot ${kind}`} /><h2>{title}</h2><p>{hint}</p></div><strong>{formatINR(items.filter((item) => item.kind === kind).reduce((sum, item) => sum + item.amount, 0))}</strong></div>
+                  <div className="section-title"><div><span className={`kind-dot ${kind}`} /><h2>{title}</h2><p>{hint}</p></div><strong>{formatUSD(items.filter((item) => item.kind === kind).reduce((sum, item) => sum + item.amount, 0))}</strong></div>
                   <div className="item-list">
                     {items.filter((item) => item.kind === kind).map((item) => (
                       <div className="item-row" key={item.id}>
                         <span>{item.label}<small>{item.frequency.replace("_", " ")}</small></span>
-                        <strong>{formatINR(item.amount)}</strong>
+                        <strong>{formatUSD(item.amount)}</strong>
                         <button className="remove" aria-label={`Remove ${item.label}`} onClick={() => void removeItem(item.id)} disabled={saving}>×</button>
                       </div>
                     ))}
@@ -174,7 +174,7 @@ export function BlueprintBuilder() {
                   </div>
                   <form action={(formData) => addItem(kind, formData)} className="add-form">
                     <input required name="label" placeholder={`Add ${kind}`} aria-label={`${title} label`} />
-                    <input required name="amount" type="number" min="1" step="0.01" placeholder="Amount ₹" aria-label={`${title} amount`} />
+                    <input required name="amount" type="number" min="1" step="0.01" placeholder="Amount $" aria-label={`${title} amount`} />
                     <select name="frequency" defaultValue={kind === "income" || kind === "expense" ? "monthly" : "one_time"} aria-label={`${title} frequency`}>
                       <option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one_time">Current total</option>
                     </select>
@@ -187,10 +187,10 @@ export function BlueprintBuilder() {
             <aside className="summary card">
               <span className="eyebrow">LIVE SUMMARY</span>
               <h2>Your money at a glance</h2>
-              <div className="metric feature"><span>Net worth</span><strong>{formatINR(metrics.netWorth)}</strong><small>Assets minus liabilities</small></div>
-              <div className="metric"><span>Monthly income</span><strong>{formatINR(metrics.monthlyIncome)}</strong></div>
-              <div className="metric"><span>Monthly expenses</span><strong>{formatINR(metrics.monthlyExpense)}</strong></div>
-              <div className="metric"><span>Monthly surplus</span><strong className={metrics.monthlySurplus < 0 ? "negative" : "positive"}>{formatINR(metrics.monthlySurplus)}</strong></div>
+              <div className="metric feature"><span>Net worth</span><strong>{formatUSD(metrics.netWorth)}</strong><small>Assets minus liabilities</small></div>
+              <div className="metric"><span>Monthly income</span><strong>{formatUSD(metrics.monthlyIncome)}</strong></div>
+              <div className="metric"><span>Monthly expenses</span><strong>{formatUSD(metrics.monthlyExpense)}</strong></div>
+              <div className="metric"><span>Monthly surplus</span><strong className={metrics.monthlySurplus < 0 ? "negative" : "positive"}>{formatUSD(metrics.monthlySurplus)}</strong></div>
               <div className="rate">
                 <div><span>Savings rate</span><strong>{metrics.savingsRate.toFixed(1)}%</strong></div>
                 <div className="track"><span style={{ width: `${Math.max(0, Math.min(100, metrics.savingsRate))}%` }} /></div>

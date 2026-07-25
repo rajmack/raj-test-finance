@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatINR, type Recommendation } from "@/lib/finance";
+import { formatUSD, type Recommendation } from "@/lib/finance";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UnlockButton } from "@/app/components/unlock-button";
@@ -26,8 +26,8 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
           <small>Generated {new Date(report.created_at).toLocaleDateString("en-IN", { dateStyle: "long" })}</small>
         </header>
         <section className="report-metrics">
-          <div><span>Net worth</span><strong>{formatINR(Number(report.net_worth))}</strong></div>
-          <div><span>Monthly surplus</span><strong>{formatINR(Number(report.monthly_surplus))}</strong></div>
+          <div><span>Net worth</span><strong>{formatUSD(Number(report.net_worth))}</strong></div>
+          <div><span>Monthly surplus</span><strong>{formatUSD(Number(report.monthly_surplus))}</strong></div>
           <div><span>Savings rate</span><strong>{Number(report.savings_rate).toFixed(1)}%</strong></div>
         </section>
         <section className="report-section">

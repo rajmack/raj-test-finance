@@ -19,5 +19,5 @@ export function UnlockButton({ reportId }: { reportId: string }) {
     }
     window.location.assign(result.url);
   }
-  return <><button className="unlock" onClick={() => void checkout()} disabled={loading}>{loading ? "Opening secure checkout…" : "Unlock full report — ₹299"}</button>{error && <p className="checkout-error">{error}</p>}</>;
+  return <><button className="unlock" onClick={() => void checkout()} disabled={loading}>{loading ? "Opening secure checkout…" : "Unlock full report — $299"}</button>{error && <p className="checkout-error">{error}</p>}</>;
 }

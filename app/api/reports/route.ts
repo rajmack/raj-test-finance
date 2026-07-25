@@ -1,4 +1,4 @@
-import { buildRecommendations, calculateMetrics, formatINR, type LineItem } from "@/lib/finance";
+import { buildRecommendations, calculateMetrics, formatUSD, type LineItem } from "@/lib/finance";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const metrics = calculateMetrics(items);
     const recommendations = buildRecommendations(metrics);
     const goal = profile.goal_label ? ` toward “${profile.goal_label}”` : "";
-    const summary = `Your net worth is ${formatINR(metrics.netWorth)} and you currently have ${formatINR(metrics.monthlySurplus)} left each month. That is a ${metrics.savingsRate.toFixed(1)}% savings rate. Your blueprint focuses on the clearest next steps${goal}, starting with ${recommendations[0].title.toLowerCase()}.`;
+    const summary = `Your net worth is ${formatUSD(metrics.netWorth)} and you currently have ${formatUSD(metrics.monthlySurplus)} left each month. That is a ${metrics.savingsRate.toFixed(1)}% savings rate. Your blueprint focuses on the clearest next steps${goal}, starting with ${recommendations[0].title.toLowerCase()}.`;
     const { data: report, error: reportError } = await supabase.from("reports").insert({
       profile_id: profileId,
       net_worth: metrics.netWorth,

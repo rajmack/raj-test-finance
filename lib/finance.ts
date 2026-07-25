@@ -58,7 +58,7 @@ export function buildRecommendations(metrics: Metrics): Recommendation[] {
   if (metrics.savingsRate < 5) {
     recommendations.push({
       title: "Create breathing room this month",
-      detail: `Your monthly surplus is ${formatINR(metrics.monthlySurplus)}. Review your three largest expenses and aim to free at least 10% of income.`,
+      detail: `Your monthly surplus is ${formatUSD(metrics.monthlySurplus)}. Review your three largest expenses and aim to free at least 10% of income.`,
       priority: "critical",
     });
   } else if (metrics.savingsRate < 20) {
@@ -83,7 +83,7 @@ export function buildRecommendations(metrics: Metrics): Recommendation[] {
   } else if (metrics.liabilities > 0) {
     recommendations.push({
       title: "Use a clear debt payoff order",
-      detail: `List rates for your ${formatINR(metrics.liabilities)} of liabilities and overpay the costliest debt while maintaining minimums.`,
+      detail: `List rates for your ${formatUSD(metrics.liabilities)} of liabilities and overpay the costliest debt while maintaining minimums.`,
       priority: "medium",
     });
   }
@@ -109,10 +109,10 @@ export function buildRecommendations(metrics: Metrics): Recommendation[] {
   return recommendations.sort((a, b) => rank[a.priority] - rank[b.priority]).slice(0, 5);
 }
 
-export function formatINR(value: number) {
-  return new Intl.NumberFormat("en-IN", {
+export function formatUSD(value: number) {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "INR",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
 }

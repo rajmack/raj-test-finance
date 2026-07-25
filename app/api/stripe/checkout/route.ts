@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       mode: "payment",
       line_items: [{
         price_data: {
-          currency: "inr",
+          currency: "usd",
           unit_amount: 29900,
           product_data: { name: "Full Financial Blueprint", description: "Unlock every recommendation in your personal blueprint." },
         },
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       success_url: `${origin}/reports/${reportId}?checkout=success`,
       cancel_url: `${origin}/reports/${reportId}?checkout=cancelled`,
     }, stripeAccountOptions());
-    await supabase.from("payments").insert({ report_id: reportId, stripe_session_id: session.id, amount: 299, currency: "INR", status: "pending" });
+    await supabase.from("payments").insert({ report_id: reportId, stripe_session_id: session.id, amount: 299, currency: "USD", status: "pending" });
     await supabase.from("reports").update({ stripe_session_id: session.id }).eq("id", reportId);
     return NextResponse.json({ url: session.url });
   } catch (error) {
