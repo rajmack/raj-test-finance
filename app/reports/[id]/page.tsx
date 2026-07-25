@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { UnlockButton } from "@/app/components/unlock-button";
 
 export const dynamic = "force-dynamic";
+const PAYWALL_ENABLED = false;
 
 export default async function ReportPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ checkout?: string }> }) {
   const { id } = await params;
@@ -40,14 +41,14 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
           <h2>Recommendations, in priority order</h2>
           <div className="recommendations">
             {recommendations.map((recommendation, index) => {
-              const locked = !report.is_paid && index > 0;
+              const locked = PAYWALL_ENABLED && !report.is_paid && index > 0;
               return <article className={`recommendation ${locked ? "locked" : ""}`} key={`${recommendation.title}-${index}`}>
                 <div className={`priority ${recommendation.priority}`}>{index + 1}</div>
                 <div><span>{recommendation.priority}</span><h3>{recommendation.title}</h3><p>{formatUSDText(recommendation.detail)}</p></div>
               </article>;
             })}
           </div>
-          {!report.is_paid && (
+          {PAYWALL_ENABLED && !report.is_paid && (
             <div className="paywall">
               <span>🔐</span><h2>Unlock your complete action plan</h2>
               <p>See every recommendation and keep this private link for future reference.</p>
@@ -55,7 +56,7 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
               <small>Secure one-time payment via Stripe</small>
             </div>
           )}
-          {report.is_paid && <div className="unlocked">✓ Full blueprint unlocked</div>}
+          {PAYWALL_ENABLED && report.is_paid && <div className="unlocked">✓ Full blueprint unlocked</div>}
         </section>
         <footer>Educational guidance only — not regulated financial advice.</footer>
       </div>
