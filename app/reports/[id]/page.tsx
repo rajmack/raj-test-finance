@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatUSD, type Recommendation } from "@/lib/finance";
+import { formatUSD, formatUSDText, type Recommendation } from "@/lib/finance";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UnlockButton } from "@/app/components/unlock-button";
@@ -33,7 +33,7 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
         <section className="report-section">
           <span className="eyebrow">WHAT YOUR NUMBERS SAY</span>
           <h2>A clear read on where you stand</h2>
-          <p className="summary-text">{report.summary_text}</p>
+          <p className="summary-text">{formatUSDText(report.summary_text ?? "")}</p>
         </section>
         <section className="report-section">
           <span className="eyebrow">YOUR NEXT MOVES</span>
@@ -43,7 +43,7 @@ export default async function ReportPage({ params, searchParams }: { params: Pro
               const locked = !report.is_paid && index > 0;
               return <article className={`recommendation ${locked ? "locked" : ""}`} key={`${recommendation.title}-${index}`}>
                 <div className={`priority ${recommendation.priority}`}>{index + 1}</div>
-                <div><span>{recommendation.priority}</span><h3>{recommendation.title}</h3><p>{recommendation.detail}</p></div>
+                <div><span>{recommendation.priority}</span><h3>{recommendation.title}</h3><p>{formatUSDText(recommendation.detail)}</p></div>
               </article>;
             })}
           </div>

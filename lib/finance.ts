@@ -116,3 +116,10 @@ export function formatUSD(value: number) {
     maximumFractionDigits: 0,
   }).format(value);
 }
+
+export function formatUSDText(value: string) {
+  return value.replace(/\$[\d,]+(?:\.\d+)?/g, (amount) => {
+    const parsed = Number(amount.slice(1).replaceAll(",", ""));
+    return Number.isFinite(parsed) ? formatUSD(parsed) : amount;
+  });
+}
