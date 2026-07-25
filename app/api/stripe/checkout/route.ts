@@ -1,56 +1,36 @@
-import { createClient } from "@/lib/supabase/server";
-import { createCheckoutSession } from "@/lib/stripe";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { stripe, stripeAccountOptions } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 
-/**
- * POST /api/stripe/checkout
- * Body: { priceId: string, successUrl?: string, cancelUrl?: string }
- *
- * Creates a Stripe Checkout Session for the authenticated user.
- * Respects Connect platform fee if STRIPE_PLATFORM_FEE_PERCENT is set.
- */
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { priceId, successUrl, cancelUrl } = body as {
-      priceId: string;
-      successUrl?: string;
-      cancelUrl?: string;
-    };
-
-    if (!priceId) {
-      return NextResponse.json({ error: "priceId is required" }, { status: 400 });
-    }
-
-    const origin = request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
-
-    // Look up existing Stripe customer ID if stored
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_customer_id")
-      .eq("id", user.id)
-      .single();
-
-    const session = await createCheckoutSession({
-      priceId,
-      customerId: profile?.stripe_customer_id ?? undefined,
-      userId: user.id,
-      successUrl: successUrl ?? `${origin}/dashboard?checkout=success`,
-      cancelUrl: cancelUrl ?? `${origin}/dashboard?checkout=canceled`,
-    });
-
+    const { reportId } = (await request.json()) as { reportId?: string };
+    if (!reportId) return NextResponse.json({ error: "A report is required." }, { status: 400 });
+    const supabase = createAdminClient();
+    const { data: report } = await supabase.from("reports").select("id,is_paid").eq("id", reportId).single();
+    if (!report) return NextResponse.json({ error: "Report not found." }, { status: 404 });
+    if (report.is_paid) return NextResponse.json({ error: "This report is already unlocked." }, { status: 409 });
+    const origin = request.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL;
+    if (!origin) throw new Error("NEXT_PUBLIC_APP_URL is not configured.");
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{
+        price_data: {
+          currency: "inr",
+          unit_amount: 29900,
+          product_data: { name: "Full Financial Blueprint", description: "Unlock every recommendation in your personal blueprint." },
+        },
+        quantity: 1,
+      }],
+      metadata: { reportId },
+      success_url: `${origin}/reports/${reportId}?checkout=success`,
+      cancel_url: `${origin}/reports/${reportId}?checkout=cancelled`,
+    }, stripeAccountOptions());
+    await supabase.from("payments").insert({ report_id: reportId, stripe_session_id: session.id, amount: 299, currency: "INR", status: "pending" });
+    await supabase.from("reports").update({ stripe_session_id: session.id }).eq("id", reportId);
     return NextResponse.json({ url: session.url });
-  } catch (err) {
-    console.error("[stripe/checkout]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error) {
+    console.error("[stripe/checkout]", error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Checkout is unavailable." }, { status: 500 });
   }
 }
